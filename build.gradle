@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.21'
+    id 'maven-publish'
 }
 
 group 'org.example'
@@ -7,11 +8,9 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-    maven { url "https://jitpack.io" }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation 'junit:junit:4.13.1'
-    implementation 'com.github.p51lee:Kotrix:1.0.0'
 }
