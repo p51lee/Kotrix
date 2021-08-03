@@ -1,11 +1,10 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.21'
     id 'maven-publish'
-    id 'java-library'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'com.github.p51lee'
+version '1.0.2'
 
 repositories {
     mavenCentral()
@@ -14,4 +13,13 @@ repositories {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib"
     implementation 'junit:junit:4.13.1'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
 }
