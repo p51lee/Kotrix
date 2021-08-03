@@ -7,7 +7,17 @@ import utils.pseudoEquals
 import kotlin.math.abs
 import kotlin.math.pow
 
-open class Tensor(val shape: IntArray, val data: DoubleArray =
+/**
+ * Represents real, multidimensional tensor. Length of a data must fit the shape.
+ *
+ * @property shape tensor shape.
+ * @property dim tensor dimension.
+ * @constructor makes a new tensor with a given shape and data.
+ *
+ * @param shape tensor shape.
+ * @param data can be [DoubleArray], [LongArray], [FloatArray] or [IntArray].
+ */
+open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     DoubleArray(shape.reduce {
             total, num ->
         if (num <= 0) throw IllegalArgumentException("Tensor.init: Invalid shape")
@@ -15,7 +25,7 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
     }
     )
 ) {
-    val size: Int = data.size
+    private val size: Int = data.size
     val dim: Int = shape.size
 
     init {
@@ -147,6 +157,12 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         } else return false
     }
 
+    /**
+     * Determines if [other] is close enough to be said the same.
+     *
+     * @param other
+     * @return true if the average difference of each element is smaller than 0.0001, else false.
+     */
     fun pseudoEquals(other: Tensor): Boolean {
         val shapeEq = this.shape.contentEquals(other.shape)
         val diffNorm = (this - other).frobeniusNormSquared()
@@ -154,6 +170,11 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         return shapeEq && dataPseudoEq
     }
 
+    /**
+     * Downcast to [Matrix] class, if possible: i.e. 2-dimensional.
+     *
+     * @return converted matrix.
+     */
     fun toMatrix(): Matrix {
         return when (dim) {
             1 -> {
@@ -166,6 +187,12 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         }
     }
 
+    /**
+     * Reshape a tensor. From the current shape, it is possible to estimate the `-1` part among the new shapes.
+     *
+     * @param newShape One or less `-1` in [newShape] is allowed.
+     * @return a new tensor with the [newShape]
+     */
     fun reshape(newShape: IntArray): Tensor {
         var negOneIndex = -1
         var negOneCount = 0

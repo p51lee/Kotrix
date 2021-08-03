@@ -74,6 +74,11 @@ private fun Matrix.durandKernerMethod(f: (ComplexDouble) -> ComplexDouble): Arra
     return roots
 }
 
+/**
+ * Solves eigenvalue problem of a square matrix and finds eigenvectors of each eigenvalue. The answer may be complex.
+ *
+ * @return an array of { matrix of eigenvectors, diagonal matrix of eigenvalues }.
+ */
 fun Matrix.eig(): Array<ComplexMatrix> {
     if (rows != cols) throw IllegalArgumentException("Matrix.evp: Only available for square matrices")
 

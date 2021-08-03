@@ -3,7 +3,7 @@ package utils
 import complex.ComplexTensor
 import real.Tensor
 
-class StringVector(val stringData: ArrayList<String>) {
+internal class StringVector(val stringData: ArrayList<String>) {
     override fun toString(): String {
         var retStr = ""
         stringData.forEachIndexed {index, value ->

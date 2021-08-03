@@ -5,6 +5,14 @@ import utils.StringVector
 import utils.pseudoEquals
 import kotlin.math.pow
 
+/**
+ * Represents complex, multidimensional tensor.
+ *
+ * @property shape
+ * @property data
+ * @property size
+ * @property dim
+ */
 open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
     Array(shape.reduce {
             total, num ->

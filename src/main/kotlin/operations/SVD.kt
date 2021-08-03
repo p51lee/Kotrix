@@ -4,6 +4,11 @@ import complex.ComplexMatrix
 import real.Matrix
 import utils.R
 
+/**
+ * Calculate the singular value decomposition of a matrix. The result may be complex.
+ *
+ * @return an array of { unitary matrix(U), rectangular diagonal matrix (Sigma)) , unitary matrix (VT) }
+ */
 fun Matrix.svd(): Array<ComplexMatrix> {
     val matAAT = this * this.transpose()
     val matATA = this.transpose() * this

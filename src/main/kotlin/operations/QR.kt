@@ -4,12 +4,15 @@ import real.ColumnVector
 import real.Matrix
 import utils.pseudoEquals
 
+/**
+ * Calculates QR decomposition of square matrix.
+ *
+ * @return an array of { orthogonal matrix, upper triangular matrix }.
+ */
 fun Matrix.qr(): Array<Matrix> {
     if (rows != cols) throw IllegalArgumentException("Matrix.qr: Only available for square matrices")
-//    if (abs(determinant()) == 0.0) throw IllegalStateException("Matrix.qr: Only available for invertible matrices")
 
     lateinit var u: ColumnVector
-//    val columnVectors = arrayListOf<ColumnVector>()
     val unitVectors = arrayListOf<ColumnVector>()
 
     for (colIndex in 0 until cols) {
@@ -22,7 +25,6 @@ fun Matrix.qr(): Array<Matrix> {
             unitVectors.add(ColumnVector(rows))
         } else {
             unitVectors.add(u.normalize())
-//            columnVectors.add(a)
         }
     }
     val matQ = Matrix.identityMatrix(rows)
