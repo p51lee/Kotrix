@@ -7,6 +7,15 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 
+/**
+ * Represents real matrix. [Matrix] class is a subclass of [Tensor] class.
+ *
+ * @property rows number of rows.
+ * @property cols number of columns.
+ * @constructor Creates a new matrix.
+ *
+ * @param data can be [DoubleArray], [LongArray], [FloatArray] or [IntArray].
+ */
 open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(rows * cols) { 0.0 }): Tensor(intArrayOf(rows, cols), data) {
 
     constructor(rows2: Int, cols2: Int, data2: LongArray) : this(
@@ -122,6 +131,11 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         return Matrix(rows, cols, newData)
     }
 
+    /**
+     * Transpose this Matrix.
+     *
+     * @return transposed matrix.
+     */
     open fun transpose(): Matrix {
         val newData = DoubleArray(rows * cols) {
             val transposedRowIndex = it / rows
@@ -131,18 +145,32 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         return Matrix(cols, rows, newData)
     }
 
+    /**
+     * Calculate adjoint matrix of this matrix.
+     *
+     * @return adjoint matrix.
+     */
     fun adjoint() : Matrix {
         if (rows != cols) throw IllegalArgumentException("Matrix.adjointMatrix: Only available for square matrices")
         val newData = DoubleArray(rows * cols) {
             val rowIndex = it / cols
             val colIndex = it % cols
             val sign = (-1.0).pow(rowIndex + colIndex)
-            val cofactorDet = this.cofactorMatrix(rowIndex, colIndex).determinant()
+            val cofactorDet = this.minorMatrix(rowIndex, colIndex).determinant()
             sign * cofactorDet
         }
         return Matrix(rows, cols, newData).transpose()
     }
 
+    /**
+     * Get a submatrix by slicing this matrix.
+     *
+     * @param rowIndexStart row index starting point.
+     * @param rowIndexEnd row index ending point. (not included)
+     * @param colIndexStart column index starting point.
+     * @param colIndexEnd column index ending point. (not included)
+     * @return
+     */
     open fun getSubmatrix(rowIndexStart: Int, rowIndexEnd: Int, colIndexStart: Int, colIndexEnd: Int): Matrix {
         return if (rowIndexStart < 0 || colIndexStart < 0 || rowIndexStart >= rowIndexEnd || colIndexStart >= colIndexEnd
             || rowIndexEnd > rows || colIndexEnd > cols) {
@@ -159,6 +187,16 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         }
     }
 
+    /**
+     * Set a submatrix by substituting [other] to desired position.
+     * The shape of [other] must match the position described.
+     *
+     * @param rowIndexStart row index starting point.
+     * @param rowIndexEnd row index ending point. (not included)
+     * @param colIndexStart column index starting point.
+     * @param colIndexEnd column index ending point. (not included)
+     * @param other new submatrix.
+     */
     open fun setSubmatrix(rowIndexStart: Int, rowIndexEnd: Int, colIndexStart: Int, colIndexEnd: Int, other: Matrix) {
         val newRows = rowIndexEnd - rowIndexStart
         val newCols = colIndexEnd - colIndexStart
@@ -174,7 +212,15 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         }
     }
 
-    fun cofactorMatrix(rowIndex: Int, colIndex: Int) : Matrix {
+    /**
+     * Get a minor matrix.
+     * Minors are obtained by removing just one row and one column from square matrices. (first minors)
+     *
+     * @param rowIndex
+     * @param colIndex
+     * @return
+     */
+    fun minorMatrix(rowIndex: Int, colIndex: Int) : Matrix {
         return if (rows < 2 || cols < 2 || rowIndex >= rows || colIndex >= cols) {
             throw IllegalArgumentException("Matrix.cofactorMatrix: Index out of bound")
         } else {
@@ -189,6 +235,13 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         }
     }
 
+    /**
+     * Do a row switching transformation; exchange [rowIndex1]th row and [rowIndex2]th row.
+     *
+     * @param rowIndex1
+     * @param rowIndex2
+     * @return new transformed matrix.
+     */
     fun switchRow(rowIndex1: Int, rowIndex2: Int): Matrix {
         return if (rowIndex1 < 0 || rowIndex2 < 0 || rowIndex1 >= rows || rowIndex2 >= rows) {
             throw IllegalArgumentException("Matrix.switchRow: Index out of bound")
@@ -208,7 +261,15 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         }
     }
 
-    fun addRow(srcRowIndex: Int, dstRowIndex: Int, fraction: Double): Matrix {
+    /**
+     * Do a row addition transformation; add dstRow multiplied by [fraction] to srcRow.
+     *
+     * @param srcRowIndex
+     * @param dstRowIndex
+     * @param fraction
+     * @return new transformed matrix.
+     */
+    fun addRow(srcRowIndex: Int, dstRowIndex: Int, fraction: Number): Matrix {
         return if (srcRowIndex < 0 || dstRowIndex < 0 || srcRowIndex >= rows || dstRowIndex >= rows) {
             throw IllegalArgumentException("Matrix.addRow: Index out of bound")
         } else if (srcRowIndex == dstRowIndex) {
@@ -218,7 +279,7 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
                 val newRowIndex = it / cols
                 val newColIndex = it % cols
                 when (newRowIndex) {
-                    dstRowIndex -> this[dstRowIndex, newColIndex] + fraction * this[srcRowIndex, newColIndex]
+                    dstRowIndex -> this[dstRowIndex, newColIndex] + fraction.toDouble() * this[srcRowIndex, newColIndex]
                     else -> this[newRowIndex, newColIndex]
                 }
             }
@@ -226,8 +287,15 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         }
     }
 
-    fun concat(other: Matrix, dim: Int) : Matrix {
-        return when (dim) {
+    /**
+     * Concatenate to other matrix.
+     *
+     * @param other matrix to be concatenated.
+     * @param concatDim dimension to which other matrix concatenate.
+     * @return concatenated matrix.
+     */
+    fun concat(other: Matrix, concatDim: Int) : Matrix {
+        return when (concatDim) {
             0 -> {
                 if (cols != other.cols) throw IllegalArgumentException("Matrix.concat: number of columns does not match")
                 val newRows = rows + other.rows
@@ -262,6 +330,11 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         }
     }
 
+    /**
+     * Calculate the squared norm of each column vector.
+     *
+     * @return row vector of each squared norm.
+     */
     fun colVecNormSq(): RowVector {
         val newData = DoubleArray(1 * cols) {
             var norm = 0.0
@@ -273,6 +346,11 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         return RowVector(cols, newData)
     }
 
+    /**
+     * Calculate the squared norm of each row vector.
+     *
+     * @return column vector of each squared norm.
+     */
     fun rowVecNormSq(): ColumnVector {
         val newData = DoubleArray(rows * 1) {
             var norm = 0.0
@@ -284,12 +362,23 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         return ColumnVector(rows, newData)
     }
 
+    /**
+     * Calculate the sum of all values in this matrix.
+     *
+     * @return the sum.
+     */
     fun sum(): Double {
         var sum = 0.0
         data.forEach { sum += it }
         return sum
     }
 
+    /**
+     * Element-wise multiplication. [other] must have the same shape as this matrix.
+     *
+     * @param other
+     * @return multiplied matrix.
+     */
     fun eltwiseMul(other: Matrix): Matrix {
         if (rows != other.rows || cols != other.cols)
             throw IllegalArgumentException("Matrix.eltwiseMul: Both operands must have the same shape")
@@ -300,6 +389,11 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         })
     }
 
+    /**
+     * Calculate the mean value of each row.
+     *
+     * @return column vector of each mean.
+     */
     fun rowWiseMean(): ColumnVector {
         return ColumnVector(rows, DoubleArray(rows) {
             var rowSum = 0.0
@@ -310,6 +404,11 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         })
     }
 
+    /**
+     * Calculate the mean value of each column.
+     *
+     * @return row vector of each mean.
+     */
     fun columnWiseMean(): RowVector {
         return RowVector(cols, DoubleArray(cols) {
             var colSum = 0.0
@@ -320,6 +419,12 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         })
     }
 
+    /**
+     * Same as [Tensor.map] but returns [Matrix].
+     *
+     * @param lambda mapping function.
+     * @return a newly mapped matrix.
+     */
     override fun map(lambda: (e: Double) -> Number): Matrix {
         return Matrix(rows, cols, DoubleArray(rows * cols) {
             val rowIndex = it / cols
@@ -328,6 +433,17 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         })
     }
 
+    /**
+     * Reshape this matrix. From the current shape, it is possible to estimate the `-1` part among the parameters.
+     * One or less `-1` is allowed.
+     *
+     * This function does the same thing as [Tensor.reshape] (intArrayOf([newRows], [newCols]))
+     * except for that it returns [Matrix].
+     *
+     * @param newRows a new number of rows.
+     * @param newCols a new number of columns.
+     * @return a new matrix with [newRows] rows and [newCols] columns.
+     */
     fun reshape(newRows: Int, newCols: Int): Matrix {
         return when {
             newRows >= 0 && newCols >= 0 -> {
@@ -346,27 +462,58 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
         }
     }
 
+    /**
+     * Downcast to [RowVector] class if possible; i.e. it has only one row.
+     *
+     * @return downcast vector.
+     */
     fun toRowVector(): RowVector {
         if (rows != 1) throw IllegalStateException("Matrix.toRowVector: Cannot downcast to RowVector")
         return RowVector(cols, data)
     }
 
+    /**
+     * Downcast to [ColumnVector] class if possible; i.e. it has only one column.
+     *
+     * @return downcast vector.
+     */
     fun toColVector(): ColumnVector {
         if (cols != 1) throw IllegalStateException("Matrix.toColVector: Cannot downcast to ColumnVector")
         return ColumnVector(rows, data)
     }
 
+    /**
+     * Same as [Tensor.toComplex] but returns [ComplexMatrix].
+     *
+     * @return complex matrix.
+     */
     override fun toComplex(): ComplexMatrix {
         return ComplexMatrix(rows, cols, Array(rows * cols) { data[it].R })
     }
 
+    /**
+     * Same as [Tensor.copy] but returns [Matrix]
+     *
+     * @return a new [Matrix] instance with the same shape and data.
+     */
     override fun copy() = Matrix(rows, cols, data.copyOf())
 
+    /**
+     * Calculate the trace of this matrix.
+     *
+     * @return the trace of this matrix.
+     */
     fun trace(): Double {
         if (rows != cols) throw IllegalStateException("Matrix.trace: only for square matrices")
         return DoubleArray(rows) { this[it, it] }.sum()
     }
 
+    /**
+     * Calculate the [n]th power of this matrix.
+     *
+     * @param n multiplier
+     * @return [n]th power of this matrix.
+     */
     fun pow(n: Int): Matrix {
         if (rows != cols) throw IllegalStateException("Matrix.pow: only for square matrices")
         if (n < 0) throw IllegalArgumentException("Matrix.pow: only available for non-negative integer")
@@ -376,25 +523,51 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
     }
 
     companion object {
-        fun identityMatrix(dim: Int): Matrix {
-            val newData = DoubleArray(dim * dim) {
-                val rowIndex = it / dim
-                val colIndex = it % dim
+        /**
+         * Make an identity matrix of order [n].
+         *
+         * @param n
+         * @return an identity matrix of order [n].
+         */
+        fun identityMatrix(n: Int): Matrix {
+            val newData = DoubleArray(n * n) {
+                val rowIndex = it / n
+                val colIndex = it % n
                 if (rowIndex == colIndex) 1.0 else 0.0
             }
-            return Matrix(dim, dim, newData)
+            return Matrix(n, n, newData)
         }
 
-        fun zeros(n: Int, m: Int): Matrix {
-            return if (n < 1 || m < 1) throw IllegalArgumentException("Matrix.zeros: n, m must be positive integers")
-            else Matrix(n, m, DoubleArray(n * m) { 0.0 })
+        /**
+         * Make a zero matrix of shape [m] * [n].
+         *
+         * @param m number of rows.
+         * @param n number of columns.
+         * @return a zero matrix.
+         */
+        fun zeros(m: Int, n: Int): Matrix {
+            return if (m < 1 || n < 1) throw IllegalArgumentException("Matrix.zeros: n, m must be positive integers")
+            else Matrix(m, n, DoubleArray(m * n) { 0.0 })
         }
 
-        fun ones(n: Int, m: Int): Matrix {
-            return if (n < 1 || m < 1) throw IllegalArgumentException("Matrix.ones: n, m must be positive integers")
-            else Matrix(n, m, DoubleArray(n * m) { 1.0 })
+        /**
+         * Make a matrix of shape [m] * [n] in which all elements are 1
+         *
+         * @param m number of rows.
+         * @param n number of columns.
+         * @return a matrix in which all elements are 1
+         */
+        fun ones(m: Int, n: Int): Matrix {
+            return if (m < 1 || n < 1) throw IllegalArgumentException("Matrix.ones: n, m must be positive integers")
+            else Matrix(m, n, DoubleArray(m * n) { 1.0 })
         }
 
+        /**
+         * Make a 2-dimensional rotation matrix.
+         *
+         * @param theta rotation angle in radian.
+         * @return 2-dimensional rotation matrix.
+         */
         fun rotationMatrix2d(theta: Double): Matrix {
             return Matrix(2, 2, doubleArrayOf(
                 cos(theta), -sin(theta),
@@ -402,6 +575,12 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
             ))
         }
 
+        /**
+         * Make a 3-dimensional rotation matrix about the x-axis.
+         *
+         * @param theta rotation angle in radian.
+         * @return 3-dimensional rotation matrix.
+         */
         fun rotationMatrix3dX(theta: Double): Matrix {
             return Matrix(3, 3, doubleArrayOf(
                 1.0,        0.0,            0.0,
@@ -410,6 +589,12 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
             ))
         }
 
+        /**
+         * Make a 3-dimensional rotation matrix about the y-axis.
+         *
+         * @param theta rotation angle in radian.
+         * @return 3-dimensional rotation matrix.
+         */
         fun rotationMatrix3dY(theta: Double): Matrix {
             return Matrix(3, 3, doubleArrayOf(
                 cos(theta),     0.0,        sin(theta),
@@ -418,6 +603,12 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
             ))
         }
 
+        /**
+         * Make a 3-dimensional rotation matrix about the z-axis.
+         *
+         * @param theta rotation angle in radian.
+         * @return 3-dimensional rotation matrix.
+         */
         fun rotationMatrix3dZ(theta: Double): Matrix {
             return Matrix(3, 3, doubleArrayOf(
                 cos(theta),     -sin(theta),    0.0,
@@ -426,10 +617,28 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
             ))
         }
 
+        /**
+         * Make a 3-dimensional rotation matrix of given Euler angles.
+         *
+         * Its sequence of rotation axes is z-x-z.
+         *
+         * @param alpha first Euler angle.
+         * @param beta second Euler angle.
+         * @param gamma third Euler angle.
+         * @return
+         */
         fun eulerRotationMatrix3d(alpha: Double, beta: Double, gamma: Double): Matrix {
             return rotationMatrix3dZ(alpha) * rotationMatrix3dX(beta) * rotationMatrix3dZ(gamma)
         }
 
+        /**
+         * Make an elementary matrix which represents row-switching transformation.
+         *
+         * @param n order of the matrix.
+         * @param firstIndex index of the first row to be exchanged.
+         * @param secondIndex index of the second row to be exchaged.
+         * @return an elementary matrix.
+         */
         fun rowSwitchingMatrix(n: Int, firstIndex: Int, secondIndex: Int): Matrix {
             if (firstIndex >= n || secondIndex >= n) throw IllegalArgumentException("Matrix.rowSwitchingMatrix: Index out of bound")
             return identityMatrix(n).switchRow(firstIndex, secondIndex)

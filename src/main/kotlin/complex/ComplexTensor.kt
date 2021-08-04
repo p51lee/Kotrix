@@ -188,7 +188,7 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
     }
 
     /**
-     * Reshape a tensor. From the current shape, it is possible to estimate the `-1` part among [newShape].
+     * Reshape this tensor. From the current shape, it is possible to estimate the `-1` part among [newShape].
      * One or less `-1` in [newShape] is allowed.
      *
      * @param newShape must represent the same number of elements as the original.
@@ -231,7 +231,7 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
      *
      * @param other tensor to be concatenated.
      * @param concatDim dimension to which other tensor concatenate.
-     * @return
+     * @return concatenated tensor.
      */
     fun concat(other: ComplexTensor, concatDim: Int): ComplexTensor {
         if (dim != other.dim || concatDim >= dim) throw IllegalArgumentException("ComplexTensor.concat: invalid dimension")
@@ -274,7 +274,7 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
     }
 
     /**
-     * Make a new copy of a tensor.
+     * Make a new copy of this tensor.
      *
      * @return a new [Tensor] instance with the same shape and data.
      */

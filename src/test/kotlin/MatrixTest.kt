@@ -148,7 +148,7 @@ internal class MatrixTest {
             0, 1, -3,
             0, -1, 3
         ))
-        assertEquals(cofMat1, mat1.cofactorMatrix(3, 3))
+        assertEquals(cofMat1, mat1.minorMatrix(3, 3))
     }
 
     @Test

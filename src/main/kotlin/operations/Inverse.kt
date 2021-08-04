@@ -26,5 +26,5 @@ fun ComplexMatrix.inverse() : ComplexMatrix {
     if (rows != cols) throw IllegalArgumentException("ComplexMatrix.inverseMatrix: Only available for square matrices")
     val det = this.determinant()
     return if (det == 0.0.R) ComplexMatrix.identityMatrix(rows)
-    else this.adjointMatrix() / det
+    else this.adjoint() / det
 }

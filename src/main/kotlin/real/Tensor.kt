@@ -173,7 +173,7 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     /**
      * Downcast to [Matrix] class, if possible: i.e. 2-dimensional.
      *
-     * @return converted matrix.
+     * @return downcast matrix.
      */
     fun toMatrix(): Matrix {
         return when (dim) {
@@ -188,7 +188,7 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     }
 
     /**
-     * Reshape a tensor. From the current shape, it is possible to estimate the `-1` part among [newShape].
+     * Reshape this tensor. From the current shape, it is possible to estimate the `-1` part among [newShape].
      * One or less `-1` in [newShape] is allowed.
      *
      * @param newShape must represent the same number of elements as the original.
@@ -231,7 +231,7 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
      *
      * @param other tensor to be concatenated.
      * @param concatDim dimension to which other tensor concatenate.
-     * @return
+     * @return concatenated tensor.
      */
     fun concat(other: Tensor, concatDim: Int): Tensor {
         if (dim != other.dim || concatDim >= dim) throw IllegalArgumentException("Tensor.concat: invalid dimension")
@@ -283,7 +283,7 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     }
 
     /**
-     * Make a new copy of a tensor.
+     * Make a new copy of this tensor.
      *
      * @return a new [Tensor] instance with the same shape and data.
      */
