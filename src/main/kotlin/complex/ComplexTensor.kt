@@ -1,5 +1,7 @@
 package complex
 
+import real.Matrix
+import real.Tensor
 import utils.R
 import utils.StringVector
 import utils.pseudoEquals
@@ -8,10 +10,12 @@ import kotlin.math.pow
 /**
  * Represents complex, multidimensional tensor.
  *
- * @property shape
- * @property data
- * @property size
- * @property dim
+ * @property shape tensor shape.
+ * @property dim tensor dimension.
+ * @constructor makes a new tensor with a given shape and data.
+ *
+ * @param shape tensor shape.
+ * @param data [Array] of [ComplexDouble].
  */
 open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
     Array(shape.reduce {
@@ -153,6 +157,12 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
         } else false
     }
 
+    /**
+     * Determines if [other] is close enough to be said the same.
+     *
+     * @param other
+     * @return true if the average difference of each element is smaller than 0.0001, else false.
+     */
     fun pseudoEquals(other: ComplexTensor): Boolean {
         val shapeEq = this.shape.contentEquals(other.shape)
         val diffNorm = (this - other).frobeniusNormSquared()
@@ -160,6 +170,11 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
         return shapeEq && dataPseudoEq
     }
 
+    /**
+     * Downcast to [ComplexMatrix] class, if possible: i.e. 2-dimensional.
+     *
+     * @return converted matrix.
+     */
     fun toComplexMatrix(): ComplexMatrix {
         return when (dim) {
             1 -> {
@@ -172,6 +187,13 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
         }
     }
 
+    /**
+     * Reshape a tensor. From the current shape, it is possible to estimate the `-1` part among [newShape].
+     * One or less `-1` in [newShape] is allowed.
+     *
+     * @param newShape must represent the same number of elements as the original.
+     * @return a new tensor with the [newShape].
+     */
     fun reshape(newShape: IntArray): ComplexTensor {
         var negOneIndex = -1
         var negOneCount = 0
@@ -195,10 +217,22 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
         return ComplexTensor(newShape, data)
     }
 
+    /**
+     * Reshape to a 1-dimensional tensor.
+     *
+     * @return 1-dimensional tensor.
+     */
     fun flatten(): ComplexTensor {
         return this.reshape(intArrayOf(-1))
     }
 
+    /**
+     * Concatenate to other tensor.
+     *
+     * @param other tensor to be concatenated.
+     * @param concatDim dimension to which other tensor concatenate.
+     * @return
+     */
     fun concat(other: ComplexTensor, concatDim: Int): ComplexTensor {
         if (dim != other.dim || concatDim >= dim) throw IllegalArgumentException("ComplexTensor.concat: invalid dimension")
         else {
@@ -227,14 +261,30 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
         }
     }
 
+    /**
+     * Apply a mapping function to each element.
+     *
+     * @param lambda mapping function.
+     * @return a newly mapped tensor.
+     */
     open fun map(lambda: (e: ComplexDouble) -> ComplexDouble): ComplexTensor {
         return ComplexTensor(shape, Array(size) {
             lambda(data[it])
         })
     }
 
+    /**
+     * Make a new copy of a tensor.
+     *
+     * @return a new [Tensor] instance with the same shape and data.
+     */
     open fun copy() = ComplexTensor(shape, data.copyOf())
 
+    /**
+     * Calculate squared frobenius norm.
+     *
+     * @return squared frobenius norm.
+     */
     fun frobeniusNormSquared(): Double {
         var frbNorm = 0.0
         data.forEach {
@@ -290,6 +340,12 @@ open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
     }
 
     companion object {
+        /**
+         * Stack given tensors and make a one larger dimension tensor.
+         *
+         * @param tensors tensors should all be of the same shape.
+         * @return A tensor created by stacking the given tensors.
+         */
         fun stack(tensors: Iterable<ComplexTensor>): ComplexTensor {
             val init = tensors.elementAt(0)
             return tensors.fold(init) { acc, tensor -> acc.stackSuppl(tensor) }
