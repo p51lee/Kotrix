@@ -25,7 +25,7 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     }
     )
 ) {
-    private val size: Int = data.size
+    internal val size: Int = data.size
     val dim: Int = shape.size
 
     init {
@@ -188,10 +188,11 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     }
 
     /**
-     * Reshape a tensor. From the current shape, it is possible to estimate the `-1` part among the new shapes.
+     * Reshape a tensor. From the current shape, it is possible to estimate the `-1` part among [newShape].
+     * One or less `-1` in [newShape] is allowed.
      *
-     * @param newShape One or less `-1` in [newShape] is allowed.
-     * @return a new tensor with the [newShape]
+     * @param newShape must represent the same number of elements as the original.
+     * @return a new tensor with the [newShape].
      */
     fun reshape(newShape: IntArray): Tensor {
         var negOneIndex = -1
@@ -216,10 +217,22 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
         return Tensor(newShape, data)
     }
 
+    /**
+     * Reshape to a 1-dimensional tensor.
+     *
+     * @return 1-dimensional tensor.
+     */
     fun flatten(): Tensor {
         return this.reshape(intArrayOf(-1))
     }
 
+    /**
+     * Concatenate to other tensor.
+     *
+     * @param other tensor to be concatenated.
+     * @param concatDim dimension to which other tensor concatenate.
+     * @return
+     */
     fun concat(other: Tensor, concatDim: Int): Tensor {
         if (dim != other.dim || concatDim >= dim) throw IllegalArgumentException("Tensor.concat: invalid dimension")
         else {
@@ -248,18 +261,39 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
         }
     }
 
+    /**
+     * Apply a mapping function to each element.
+     *
+     * @param lambda mapping function.
+     * @return a newly mapped tensor.
+     */
     open fun map(lambda: (e: Double) -> Number): Tensor {
         return Tensor(shape, DoubleArray(size) {
             lambda(data[it]).toDouble()
         })
     }
 
+    /**
+     * Convert to [ComplexTensor].
+     *
+     * @return complex tensor.
+     */
     open fun toComplex(): ComplexTensor {
         return ComplexTensor(shape, Array(size) { data[it].R })
     }
 
+    /**
+     * Make a new copy of a tensor.
+     *
+     * @return a new [Tensor] instance with the same shape and data.
+     */
     open fun copy() =  Tensor(shape, data.copyOf())
 
+    /**
+     * Calculate squared frobenius norm.
+     *
+     * @return squared frobenius norm.
+     */
     fun frobeniusNormSquared(): Double {
         var frbNorm = 0.0
         data.forEach {
@@ -315,6 +349,12 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     }
 
     companion object {
+        /**
+         * Stack given tensors and make a one larger dimension tensor.
+         *
+         * @param tensors tensors should all be of the same shape.
+         * @return A tensor created by stacking the given tensors.
+         */
         fun stack(tensors: Iterable<Tensor>): Tensor {
             val init = tensors.elementAt(0)
             return tensors.fold(init) { acc, tensor -> acc.stackSuppl(tensor) }
