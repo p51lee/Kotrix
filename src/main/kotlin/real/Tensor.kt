@@ -7,7 +7,17 @@ import utils.pseudoEquals
 import kotlin.math.abs
 import kotlin.math.pow
 
-open class Tensor(val shape: IntArray, val data: DoubleArray =
+/**
+ * Represents real, multidimensional tensor. Length of a data must fit the shape.
+ *
+ * @property shape tensor shape.
+ * @property dim tensor dimension.
+ * @constructor makes a new tensor with a given shape and data. If [data] is not given, it will generate a zero tensor.
+ *
+ * @param shape tensor shape.
+ * @param data must fit into the shape of this tensor.
+ */
+open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     DoubleArray(shape.reduce {
             total, num ->
         if (num <= 0) throw IllegalArgumentException("Tensor.init: Invalid shape")
@@ -15,7 +25,7 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
     }
     )
 ) {
-    val size: Int = data.size
+    internal val size: Int = data.size
     val dim: Int = shape.size
 
     init {
@@ -24,12 +34,21 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         if (size != calculateSize(shape)) throw IllegalArgumentException("Tensor.init: Invalid data length")
     }
 
+    /**
+     * data can be [LongArray].
+     */
     constructor(shape: IntArray, data: LongArray) :
             this(shape, DoubleArray(shape.reduce {tot, num -> tot * num}) { data[it].toDouble() })
 
+    /**
+     * data can be [FloatArray].
+     */
     constructor(shape: IntArray, data: FloatArray) :
             this(shape, DoubleArray(shape.reduce {tot, num -> tot * num}) { data[it].toDouble() })
 
+    /**
+     * data can be [IntArray].
+     */
     constructor(shape: IntArray, data: IntArray) :
             this(shape, DoubleArray(shape.reduce {tot, num -> tot * num}) { data[it].toDouble() })
 
@@ -147,6 +166,12 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         } else return false
     }
 
+    /**
+     * Determines if [other] is close enough to be said the same.
+     *
+     * @param other
+     * @return true if the average difference of each element is smaller than 0.0001, else false.
+     */
     fun pseudoEquals(other: Tensor): Boolean {
         val shapeEq = this.shape.contentEquals(other.shape)
         val diffNorm = (this - other).frobeniusNormSquared()
@@ -154,6 +179,11 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         return shapeEq && dataPseudoEq
     }
 
+    /**
+     * Downcast to [Matrix] class, if possible: i.e. 2-dimensional.
+     *
+     * @return downcast matrix.
+     */
     fun toMatrix(): Matrix {
         return when (dim) {
             1 -> {
@@ -166,6 +196,13 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         }
     }
 
+    /**
+     * Reshape this tensor. From the current shape, it is possible to estimate the `-1` part among [newShape].
+     * One or less `-1` in [newShape] is allowed.
+     *
+     * @param newShape must represent the same number of elements as the original.
+     * @return a new tensor with the [newShape].
+     */
     fun reshape(newShape: IntArray): Tensor {
         var negOneIndex = -1
         var negOneCount = 0
@@ -189,10 +226,22 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         return Tensor(newShape, data)
     }
 
+    /**
+     * Reshape to a 1-dimensional tensor.
+     *
+     * @return 1-dimensional tensor.
+     */
     fun flatten(): Tensor {
         return this.reshape(intArrayOf(-1))
     }
 
+    /**
+     * Concatenate to other tensor.
+     *
+     * @param other tensor to be concatenated.
+     * @param concatDim dimension to which other tensor concatenate.
+     * @return concatenated tensor.
+     */
     fun concat(other: Tensor, concatDim: Int): Tensor {
         if (dim != other.dim || concatDim >= dim) throw IllegalArgumentException("Tensor.concat: invalid dimension")
         else {
@@ -221,18 +270,39 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
         }
     }
 
+    /**
+     * Apply a mapping function to each element.
+     *
+     * @param lambda mapping function.
+     * @return a newly mapped tensor.
+     */
     open fun map(lambda: (e: Double) -> Number): Tensor {
         return Tensor(shape, DoubleArray(size) {
             lambda(data[it]).toDouble()
         })
     }
 
+    /**
+     * Convert to [ComplexTensor].
+     *
+     * @return complex tensor.
+     */
     open fun toComplex(): ComplexTensor {
         return ComplexTensor(shape, Array(size) { data[it].R })
     }
 
+    /**
+     * Make a new copy of this tensor.
+     *
+     * @return a new [Tensor] instance with the same shape and data.
+     */
     open fun copy() =  Tensor(shape, data.copyOf())
 
+    /**
+     * Calculate squared frobenius norm.
+     *
+     * @return squared frobenius norm.
+     */
     fun frobeniusNormSquared(): Double {
         var frbNorm = 0.0
         data.forEach {
@@ -288,6 +358,12 @@ open class Tensor(val shape: IntArray, val data: DoubleArray =
     }
 
     companion object {
+        /**
+         * Stack given tensors and make a one larger dimension tensor.
+         *
+         * @param tensors tensors should all be of the same shape.
+         * @return A tensor created by stacking the given tensors.
+         */
         fun stack(tensors: Iterable<Tensor>): Tensor {
             val init = tensors.elementAt(0)
             return tensors.fold(init) { acc, tensor -> acc.stackSuppl(tensor) }

@@ -139,7 +139,7 @@ internal class ComplexMatrixTest {
             7.R,    0.R,
             0.R,    1.R
         ))
-        assertEquals(cofactorMatrix, mat.cofactorMatrix(2, 2))
+        assertEquals(cofactorMatrix, mat.minorMatrix(2, 2))
     }
 
     @Test

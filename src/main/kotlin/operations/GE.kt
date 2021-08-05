@@ -6,7 +6,12 @@ import utils.R
 import utils.pseudoEquals
 import kotlin.math.abs
 
-fun Matrix.rowEchelonForm(): Matrix { // reduced row echelon form
+/**
+ * Calculate reduced row echelon form using Gaussian elimination.
+ *
+ * @return matrix in reduced row echelon form.
+ */
+fun Matrix.rowEchelonForm(): Matrix {
     var newMat = this.copy()
     var h = 0
     var k = 0
@@ -50,6 +55,11 @@ fun Matrix.rowEchelonForm(): Matrix { // reduced row echelon form
     return sortedMat
 }
 
+/**
+ * Calculate reduced row echelon form using Gaussian elimination.
+ *
+ * @return matrix in reduced row echelon form.
+ */
 fun ComplexMatrix.rowEchelonForm(): ComplexMatrix { // reduced row echelon form
     var newMat = this.copy()
     var h = 0

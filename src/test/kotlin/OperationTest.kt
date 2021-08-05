@@ -15,7 +15,7 @@ internal class OperationTest {
     @Test
     fun determinant() {
         assertEquals(-18.0, mat.determinant(), 0.00001)
-        assertEquals(-54.0, mat.cofactorMatrix(0, 1).determinant(), 0.00001)
+        assertEquals(-54.0, mat.minorMatrix(0, 1).determinant(), 0.00001)
     }
 
     @Test

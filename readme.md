@@ -94,7 +94,7 @@ println(mat)
 Supports both column vector and row vector.
 ```kotlin
 val colVec = ColumnVector(3)
-val rowVec = RowVector(3, doubleArrayOf(1.0, 2.0, 3.0))
+val rowVec = RowVector(doubleArrayOf(1.0, 2.0, 3.0))
 println(colVec)
 println(rowVec)
 ```
@@ -213,7 +213,7 @@ println(complexTensor)
     * Get an inverse matrix `val invMat = mat.inverseMatrix()`
     * Get a submatrix `val subMat = mat.getSubmatrix(rowIndexStart, rowIndexEnd, colIndexStart, colIndexEnd)`
     * Set a submatrix `mat.setSubmatrix(rowIndexStart, rowIndexEnd, colIndexStart, colIndexEnd, newMat)`
-    * Get a cofactor matrix `val cofactorMat = mat.cofactorMatrix()`
+    * Get a minor matrix `val minorMat = mat.minorMatrix(rowIndex, colIndex)`
     * Do a row switching operation `val newMat = mat.switchRow(rowIndex1, rowIndex2)`
     * Do a row addition operation `val newMat = mat.addRow(srcIndex, dstIndex, fration)`
     * Concat to another matrix `val concatMat = mat.concat(otherMat, dim)`

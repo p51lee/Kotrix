@@ -6,6 +6,11 @@ import utils.R
 import utils.times
 import utils.div
 
+/**
+ * PLU decomposition of a matrix.
+ *
+ * @return an array of { permutation matrix, lower triangle matrix, upper triangle matrix }.
+ */
 fun Matrix.plu(): Array<Matrix> { // PLU
     if (rows != cols) throw IllegalArgumentException("Matrix.plu: Only available for square matrices")
     return when (rows) {
@@ -49,6 +54,11 @@ fun Matrix.plu(): Array<Matrix> { // PLU
     }
 }
 
+/**
+ * PLU decomposition of a matrix.
+ *
+ * @return an array of { permutation matrix, lower triangle matrix, upper triangle matrix }.
+ */
 fun ComplexMatrix.plu(): Array<ComplexMatrix> { // PLU
     if (rows != cols) throw IllegalArgumentException("ComplexMatrix.plu: Only available for square matrices")
     return when (rows) {

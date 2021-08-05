@@ -7,7 +7,12 @@ import utils.R
 import utils.times
 import utils.div
 
-fun Matrix.determinant(): Double { // using LU decomposition through recursion, O(n^3)
+/**
+ * Calculates a determiant using LU decomposition through recursion, O(n^3).
+ *
+ * @return determinant of a matrix.
+ */
+fun Matrix.determinant(): Double {
     if (rows != cols) throw IllegalArgumentException("Matrix.determinant: Only available for square matrices")
     when (rows) {
         1 -> return this[0, 0]
@@ -40,6 +45,11 @@ fun Matrix.determinant(): Double { // using LU decomposition through recursion, 
     }
 }
 
+/**
+ * Calculates a determiant using LU decomposition through recursion, O(n^3).
+ *
+ * @return determinant of a matrix.
+ */
 fun ComplexMatrix.determinant(): ComplexDouble {
     // using LU decomposition through recursion, O(n^3)
     if (rows != cols) throw IllegalArgumentException("ComplexMatrix.determinant: Only available for square matrices")

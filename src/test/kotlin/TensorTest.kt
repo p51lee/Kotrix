@@ -111,7 +111,6 @@ internal class TensorTest {
     @Test
     fun toMatrix() {
         val tensor2Mat = tensor2.toMatrix()
-        assertTrue(tensor2Mat is Matrix)
         assertEquals(tensor2, tensor2Mat)
     }
 
