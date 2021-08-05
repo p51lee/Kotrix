@@ -11,6 +11,8 @@ Finally, `ColumnVector` and `RowVector` classes, which inherits `Matrix`, repres
 As `Kotrix` also supports complex tensors, all these classes have their own variations for Complex number(represented by `ComplexDouble` class):
 `ComplexTensor`, `ComplexMatrix`, `ComplexRowVector` and `ComplexColumnVector`.
 
+Full documentation is available at <https://p51lee.github.io/Kotrix/>.
+
 ### Supporting Linear Algebraic Operations
 * GE - Gaussian elimination `Matrix.rowEchelonForm()`
 * DET - determinant `Matrix.determinant()`
