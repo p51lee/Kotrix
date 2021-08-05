@@ -14,13 +14,16 @@ import utils.times
  *
  * @property rows number of rows.
  * @property cols number of columns.
- * @constructor Creates a new matrix.
+ * @constructor Creates a new matrix. If [data] is not given, it will generate a zero matrix.
  *
- * @param data [Array] of [ComplexDouble].
+ * @param data must fit into the shape of this matrix.
  */
 open class ComplexMatrix (val rows: Int, val cols: Int, data: Array<ComplexDouble> = Array(rows * cols) { 0.0.R }) :
     ComplexTensor(intArrayOf(rows, cols), data) {
 
+    /**
+     * It is possible to set a value using lambda function.
+     */
     constructor(rows2: Int, cols2: Int, lambda: (i: Int, j: Int) -> ComplexDouble) : this(rows2, cols2,
         Array(rows2 * cols2) {
             val rowIndex = it / cols2
@@ -190,13 +193,13 @@ open class ComplexMatrix (val rows: Int, val cols: Int, data: Array<ComplexDoubl
     }
 
     /**
-     * TODO
+     * Get a submatrix by slicing this matrix.
      *
-     * @param rowIndexStart
-     * @param rowIndexEnd
-     * @param colIndexStart
-     * @param colIndexEnd
-     * @return
+     * @param rowIndexStart row index starting point.
+     * @param rowIndexEnd row index ending point. (not included)
+     * @param colIndexStart column index starting point.
+     * @param colIndexEnd column index ending point. (not included)
+     * @return sliced submatrix.
      */
     open fun getSubmatrix(rowIndexStart: Int, rowIndexEnd: Int, colIndexStart: Int, colIndexEnd: Int): ComplexMatrix {
         return if (rowIndexStart < 0 || colIndexStart < 0 || rowIndexStart >= rowIndexEnd || colIndexStart >= colIndexEnd
@@ -216,7 +219,7 @@ open class ComplexMatrix (val rows: Int, val cols: Int, data: Array<ComplexDoubl
 
     /**
      * Set a submatrix by substituting [other] to desired position.
-     * The shape of [other] must match the position described.
+     * The shape of [other] must match the position you described.
      *
      * @param rowIndexStart row index starting point.
      * @param rowIndexEnd row index ending point. (not included)

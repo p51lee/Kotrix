@@ -12,10 +12,10 @@ import kotlin.math.pow
  *
  * @property shape tensor shape.
  * @property dim tensor dimension.
- * @constructor makes a new tensor with a given shape and data.
+ * @constructor makes a new tensor with a given shape and data. If [data] is not given, it will generate a zero tensor.
  *
  * @param shape tensor shape.
- * @param data [Array] of [ComplexDouble].
+ * @param data must fit into the shape of this tensor.
  */
 open class ComplexTensor(val shape: IntArray, val data: Array<ComplexDouble> =
     Array(shape.reduce {

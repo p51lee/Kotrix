@@ -1,16 +1,34 @@
 package complex
 
 import real.ColumnVector
+import real.Matrix
 import real.RowVector
+import real.Tensor
 import utils.R
 
+/**
+ * Represents a complex row vector. It is also a [Matrix] with shape 1 * [length].
+ *
+ * @property length length of a vector.
+ * @constructor Creates a new row vector. If [data] is not given, it will generate a zero vector.
+ *
+ * @param data must fit into the length of this vector.
+ */
 class ComplexRowVector(val length: Int, data: Array<ComplexDouble> = Array(length){0.0.R}): ComplexMatrix(1, length, data) {
     init {
         if (data.size != length)
             throw IllegalArgumentException("ComplexRowVector.init: length of the data is not valid")
     }
 
-    constructor (length: Int, lambda: (i: Int) -> ComplexDouble) : this(length, Array(length) { lambda(it) })
+    /**
+     * It is possible to set a value using lambda function.
+     */
+    constructor(length: Int, lambda: (i: Int) -> ComplexDouble) : this(length, Array(length) { lambda(it) })
+
+    /**
+     * If [data] is given, [length] is no longer necessary.
+     */
+    constructor(data: Array<ComplexDouble>) : this(data.size, data)
 
     operator fun get(index: Int): ComplexDouble {
         if (index < 0 || index >= length) {
@@ -99,10 +117,22 @@ class ComplexRowVector(val length: Int, data: Array<ComplexDouble> = Array(lengt
         return ComplexRowVector(length, newData)
     }
 
+    /**
+     * Same as [ComplexMatrix.transpose] but returns [ComplexColumnVector].
+     *
+     * @return transposed vector.
+     */
     override fun transpose(): ComplexColumnVector {
         return ComplexColumnVector(length, data)
     }
 
+    /**
+     * Get a subvector by slicing this vector.
+     *
+     * @param indexStart where slice starts.
+     * @param indexEnd where slice ends. (not included)
+     * @return sliced subvector.
+     */
     fun getSubvector(indexStart: Int, indexEnd: Int): ComplexRowVector {
         return if (indexStart < 0 || indexStart >= indexEnd || indexEnd > length) {
             throw IllegalArgumentException("ComplexRowVector.Subvector: Index out of bound")
@@ -115,6 +145,14 @@ class ComplexRowVector(val length: Int, data: Array<ComplexDouble> = Array(lengt
         }
     }
 
+    /**
+     * Set a subvector by substituting [other] to desired position.
+     * The length of [other] must match the position you described.
+     *
+     * @param indexStart where substitution starts.
+     * @param indexEnd where substitution ends. (not included)
+     * @param other new subvector.
+     */
     fun setSubvector(indexStart: Int, indexEnd: Int, other: ComplexRowVector) {
         val newSize = indexEnd - indexStart
         if (indexStart < 0 || indexStart >= indexEnd || indexEnd > length || newSize != other.length) {
@@ -126,12 +164,24 @@ class ComplexRowVector(val length: Int, data: Array<ComplexDouble> = Array(lengt
         }
     }
 
+    /**
+     * Same as [ComplexMatrix.eltwiseMul] but returns [ComplexRowVector].
+     *
+     * @param other must have the same length as this vector.
+     * @return multiplied vector.
+     */
     fun eltwiseMul(other: ComplexRowVector): ComplexRowVector {
         if (length != other.length)
             throw IllegalArgumentException("ComplexRowVector.eltwiseMul: Both operands must have the same size")
         return ComplexRowVector(length, Array(length) { this[it] * other[it] })
     }
 
+    /**
+     * Dot product.
+     *
+     * @param other must have the same length as this vector.
+     * @return result of the product.
+     */
     fun dotProduct(other: ComplexRowVector): ComplexDouble {
         if (length != other.length)
             throw IllegalArgumentException("ComplexRowVector.dotProduct: Both operands must have the same size")
@@ -142,6 +192,12 @@ class ComplexRowVector(val length: Int, data: Array<ComplexDouble> = Array(lengt
         return sum
     }
 
+    /**
+     * Dot product.
+     *
+     * @param other must have the same length as this vector.
+     * @return result of the product.
+     */
     fun dotProduct(other: ColumnVector): ComplexDouble {
         if (length != other.length)
             throw IllegalArgumentException("ComplexRowVector.dotProduct: Both operands must have the same size")
@@ -152,6 +208,12 @@ class ComplexRowVector(val length: Int, data: Array<ComplexDouble> = Array(lengt
         return sum
     }
 
+    /**
+     * Cross product. Available for 3-dimensional vectors only.
+     *
+     * @param other 3-dimensional vector.
+     * @return result of the product.
+     */
     fun crossProduct(other: ComplexRowVector): ComplexRowVector {
         if (length != 3 || other.length != 3)
             throw IllegalArgumentException("ComplexRowVector.dotProduct: Both operands must be 3 dimensional vectors")
@@ -164,19 +226,36 @@ class ComplexRowVector(val length: Int, data: Array<ComplexDouble> = Array(lengt
         }
     }
 
-    fun replicate(length: Int): ComplexMatrix {
-        if (length < 1) throw IllegalArgumentException("ComplexRowVector.replicate: length must be greater than 0.")
-        return ComplexMatrix(length, this.length, Array(length * this.length) {
+    /**
+     * Concatenate the copies of this vector [n] times.
+     *
+     * @param n
+     * @return result of the concatenation.
+     */
+    fun replicate(n: Int): ComplexMatrix {
+        if (n < 1) throw IllegalArgumentException("ComplexRowVector.replicate: length must be greater than 0.")
+        return ComplexMatrix(n, this.length, Array(n * this.length) {
             val colIndex = it % this.length
             this[colIndex]
         })
     }
 
+    /**
+     * Same as [Tensor.map] but returns [ComplexRowVector].
+     *
+     * @param lambda mapping function.
+     * @return a newly mapped vector.
+     */
     override fun map(lambda: (e: ComplexDouble) -> ComplexDouble): ComplexRowVector {
         return ComplexRowVector(length, Array(length) {
             lambda(this[it])
         })
     }
 
+    /**
+     * Same as [ComplexTensor.copy] but returns [ComplexRowVector]
+     *
+     * @return a new [ComplexRowVector] instance with the same shape and data.
+     */
     override fun copy() = ComplexRowVector(length, data.copyOf())
 }

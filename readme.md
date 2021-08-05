@@ -94,7 +94,7 @@ println(mat)
 Supports both column vector and row vector.
 ```kotlin
 val colVec = ColumnVector(3)
-val rowVec = RowVector(3, doubleArrayOf(1.0, 2.0, 3.0))
+val rowVec = RowVector(doubleArrayOf(1.0, 2.0, 3.0))
 println(colVec)
 println(rowVec)
 ```

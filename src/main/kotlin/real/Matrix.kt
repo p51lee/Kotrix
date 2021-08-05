@@ -12,24 +12,32 @@ import kotlin.math.sin
  *
  * @property rows number of rows.
  * @property cols number of columns.
- * @constructor Creates a new matrix.
+ * @constructor Creates a new matrix. If [data] is not given, it will generate a zero matrix.
  *
- * @param data can be [DoubleArray], [LongArray], [FloatArray] or [IntArray].
+ * @param data must fit into the shape of this matrix.
  */
 open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(rows * cols) { 0.0 }): Tensor(intArrayOf(rows, cols), data) {
-
+    /**
+     * data can be [LongArray].
+     */
     constructor(rows2: Int, cols2: Int, data2: LongArray) : this(
         rows2, cols2, DoubleArray(rows2 * cols2) { data2[it].toDouble() }
     )
-
+    /**
+     * data can be [FloatArray].
+     */
     constructor(rows2: Int, cols2: Int, data2: FloatArray) : this(
         rows2, cols2, DoubleArray(rows2 * cols2) { data2[it].toDouble() }
     )
-
+    /**
+     * data can be [IntArray].
+     */
     constructor(rows2: Int, cols2: Int, data2: IntArray) : this(
         rows2, cols2, DoubleArray(rows2 * cols2) { data2[it].toDouble() }
     )
-
+    /**
+     * It is possible to set a value using lambda function.
+     */
     constructor(rows2: Int, cols2: Int, lambda: (i: Int, j: Int) -> Number) : this(rows2, cols2,
         DoubleArray(rows2 * cols2) {
             val rowIndex = it / cols2
@@ -169,7 +177,7 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
      * @param rowIndexEnd row index ending point. (not included)
      * @param colIndexStart column index starting point.
      * @param colIndexEnd column index ending point. (not included)
-     * @return
+     * @return sliced submatrix.
      */
     open fun getSubmatrix(rowIndexStart: Int, rowIndexEnd: Int, colIndexStart: Int, colIndexEnd: Int): Matrix {
         return if (rowIndexStart < 0 || colIndexStart < 0 || rowIndexStart >= rowIndexEnd || colIndexStart >= colIndexEnd
@@ -189,7 +197,7 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
 
     /**
      * Set a submatrix by substituting [other] to desired position.
-     * The shape of [other] must match the position described.
+     * The shape of [other] must match the position you described.
      *
      * @param rowIndexStart row index starting point.
      * @param rowIndexEnd row index ending point. (not included)
@@ -374,9 +382,9 @@ open class Matrix(val rows: Int, val cols: Int, data: DoubleArray = DoubleArray(
     }
 
     /**
-     * Element-wise multiplication. [other] must have the same shape as this matrix.
+     * Element-wise multiplication.
      *
-     * @param other
+     * @param other must have the same shape as this matrix.
      * @return multiplied matrix.
      */
     fun eltwiseMul(other: Matrix): Matrix {

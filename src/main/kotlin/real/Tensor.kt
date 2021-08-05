@@ -12,10 +12,10 @@ import kotlin.math.pow
  *
  * @property shape tensor shape.
  * @property dim tensor dimension.
- * @constructor makes a new tensor with a given shape and data.
+ * @constructor makes a new tensor with a given shape and data. If [data] is not given, it will generate a zero tensor.
  *
  * @param shape tensor shape.
- * @param data can be [DoubleArray], [LongArray], [FloatArray] or [IntArray].
+ * @param data must fit into the shape of this tensor.
  */
 open class Tensor(val shape: IntArray, internal val data: DoubleArray =
     DoubleArray(shape.reduce {
@@ -34,12 +34,21 @@ open class Tensor(val shape: IntArray, internal val data: DoubleArray =
         if (size != calculateSize(shape)) throw IllegalArgumentException("Tensor.init: Invalid data length")
     }
 
+    /**
+     * data can be [LongArray].
+     */
     constructor(shape: IntArray, data: LongArray) :
             this(shape, DoubleArray(shape.reduce {tot, num -> tot * num}) { data[it].toDouble() })
 
+    /**
+     * data can be [FloatArray].
+     */
     constructor(shape: IntArray, data: FloatArray) :
             this(shape, DoubleArray(shape.reduce {tot, num -> tot * num}) { data[it].toDouble() })
 
+    /**
+     * data can be [IntArray].
+     */
     constructor(shape: IntArray, data: IntArray) :
             this(shape, DoubleArray(shape.reduce {tot, num -> tot * num}) { data[it].toDouble() })
 

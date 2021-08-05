@@ -1,23 +1,52 @@
 package real
 
+import complex.ComplexColumnVector
 import complex.ComplexRowVector
 import utils.R
 import kotlin.math.sqrt
 import utils.times
 
+/**
+ * Represents real row vector. It is also a [Matrix] with shape 1 * [length].
+ *
+ * @property length length of a vector.
+ * @constructor Creates a new row vector. If [data] is not given, it will generate a zero vector.
+ *
+ * @param data must fit into the length of this vector.
+ */
 class RowVector(val length: Int, data: DoubleArray = DoubleArray(length){0.0}): Matrix(1, length, data) {
     init {
         if (data.size != length)
             throw IllegalArgumentException("RowVector.init: length of the data is not valid")
     }
 
+    /**
+     * data can be [LongArray].
+     */
     constructor(length: Int, data: LongArray) : this(length, DoubleArray(length) { data[it].toDouble() })
 
+    /**
+     * data can be [FloatArray].
+     */
     constructor(length: Int, data: FloatArray) : this(length, DoubleArray(length) { data[it].toDouble() })
 
+    /**
+     * data can be [IntArray].
+     */
     constructor(length: Int, data: IntArray) : this(length, DoubleArray(length) { data[it].toDouble() })
 
-    constructor (length: Int, lambda: (i: Int) -> Number) : this(length, DoubleArray(length) { lambda(it).toDouble() })
+    /**
+     * It is possible to set a value using lambda function.
+     */
+    constructor(length: Int, lambda: (i: Int) -> Number) : this(length, DoubleArray(length) { lambda(it).toDouble() })
+
+    constructor(data: DoubleArray) : this(data.size, data)
+
+    constructor(data: LongArray) : this(data.size, data)
+
+    constructor(data: FloatArray) : this(data.size, data)
+
+    constructor(data: IntArray) : this(data.size, data)
 
     operator fun get(index: Int): Double {
         if (index < 0 || index >= length) {
@@ -92,10 +121,22 @@ class RowVector(val length: Int, data: DoubleArray = DoubleArray(length){0.0}): 
         return RowVector(length, newData)
     }
 
+    /**
+     * Same as [Matrix.transpose] but returns [ColumnVector].
+     *
+     * @return transposed vector.
+     */
     override fun transpose(): ColumnVector {
         return ColumnVector(length, data)
     }
 
+    /**
+     * Get a subvector by slicing this vector.
+     *
+     * @param indexStart where slice starts.
+     * @param indexEnd where slice ends. (not included)
+     * @return sliced subvector.
+     */
     fun getSubvector(indexStart: Int, indexEnd: Int): RowVector {
         return if (indexStart < 0 || indexStart >= indexEnd || indexEnd > length) {
             throw IllegalArgumentException("RowVector.Subvector: Index out of bound")
@@ -108,6 +149,14 @@ class RowVector(val length: Int, data: DoubleArray = DoubleArray(length){0.0}): 
         }
     }
 
+    /**
+     * Set a subvector by substituting [other] to desired position.
+     * The length of [other] must match the position you described.
+     *
+     * @param indexStart where substitution starts.
+     * @param indexEnd where substitution ends. (not included)
+     * @param other new subvector.
+     */
     fun setSubvector(indexStart: Int, indexEnd: Int, other: RowVector) {
         val newSize = indexEnd - indexStart
         if (indexStart < 0 || indexStart >= indexEnd || indexEnd > length || newSize != other.length) {
@@ -119,12 +168,24 @@ class RowVector(val length: Int, data: DoubleArray = DoubleArray(length){0.0}): 
         }
     }
 
+    /**
+     * Same as [Matrix.eltwiseMul] but returns [RowVector].
+     *
+     * @param other must have the same length as this vector.
+     * @return multiplied vector.
+     */
     fun eltwiseMul(other: RowVector): RowVector {
         if (length != other.length)
             throw IllegalArgumentException("RowVector.eltwiseMul: Both operands must have the same size")
         return RowVector(length, DoubleArray(length) { this[it] * other[it] })
     }
 
+    /**
+     * Dot product.
+     *
+     * @param other must have the same length as this vector.
+     * @return result of the product.
+     */
     fun dotProduct(other: RowVector): Double {
         if (length != other.length)
             throw IllegalArgumentException("RowVector.dotProduct: Both operands must have the same size")
@@ -135,6 +196,12 @@ class RowVector(val length: Int, data: DoubleArray = DoubleArray(length){0.0}): 
         return sum
     }
 
+    /**
+     * Dot product.
+     *
+     * @param other must have the same length as this vector.
+     * @return result of the product.
+     */
     fun dotProduct(other: ColumnVector): Double {
         if (length != other.length)
             throw IllegalArgumentException("RowVector.dotProduct: Both operands must have the same size")
@@ -145,6 +212,12 @@ class RowVector(val length: Int, data: DoubleArray = DoubleArray(length){0.0}): 
         return sum
     }
 
+    /**
+     * Cross product. Available for 3-dimensional vectors only.
+     *
+     * @param other 3-dimensional vector.
+     * @return result of the product.
+     */
     fun crossProduct(other: RowVector): RowVector {
         if (length != 3 || other.length != 3)
             throw IllegalArgumentException("RowVector.dotProduct: Both operands must be 3 dimensional vectors")
@@ -157,30 +230,63 @@ class RowVector(val length: Int, data: DoubleArray = DoubleArray(length){0.0}): 
         }
     }
 
-    fun replicate(length: Int): Matrix {
-        if (length < 1) throw IllegalArgumentException("RowVector.replicate: length must be greater than 0.")
-        return Matrix(length, this.length, DoubleArray(length * this.length) {
+    /**
+     * Concatenate the copies of this vector [n] times.
+     *
+     * @param n
+     * @return result of the concatenation.
+     */
+    fun replicate(n: Int): Matrix {
+        if (n < 1) throw IllegalArgumentException("RowVector.replicate: length must be greater than 0.")
+        return Matrix(n, this.length, DoubleArray(n * this.length) {
             val colIndex = it % this.length
             this[colIndex]
         })
     }
 
+    /**
+     * Same as [Tensor.map] but returns [RowVector].
+     *
+     * @param lambda mapping function.
+     * @return a newly mapped vector.
+     */
     override fun map(lambda: (e: Double) -> Number): RowVector {
         return RowVector(length, DoubleArray(length) {
             lambda(this[it]).toDouble()
         })
     }
 
+    /**
+     * Same as [Tensor.toComplex] but returns [ComplexColumnVector].
+     *
+     * @return converted [ComplexRowVector].
+     */
     override fun toComplex(): ComplexRowVector {
         return ComplexRowVector(length, Array(length) {data[it].R})
     }
 
+    /**
+     * Same as [Tensor.copy] but returns [RowVector]
+     *
+     * @return a new [RowVector] instance with the same shape and data.
+     */
     override fun copy() = RowVector(length, data.copyOf())
 
+    /**
+     * Project this vector onto [direction].
+     *
+     * @param direction direction vector.
+     * @return result of the vector projection.
+     */
     fun proj(direction: RowVector): RowVector {
         return (direction.dotProduct(this)) / direction.frobeniusNormSquared() * direction
     }
 
+    /**
+     * Normalize this vector.
+     *
+     * @return normalized vector.
+     */
     fun normalize(): RowVector {
         return this / sqrt(this.frobeniusNormSquared())
     }
